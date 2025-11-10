@@ -1,0 +1,29 @@
+{
+  "name": "erp-toolkit-mapping-examples",
+  "version": "1.0.0",
+  "description": "Example mappings for epilot ERP Integration Toolkit demonstrating data transformation from ERP systems to epilot entities",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "epilot",
+    "erp",
+    "integration",
+    "mapping",
+    "examples"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "dotenv": "^16.3.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  },
+  "dependencies": {
+    "@epilot/erp-integration-client": "^0.5.2"
+  }
+}
