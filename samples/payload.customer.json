@@ -1,0 +1,40 @@
+{
+  "customerId": "CUST-9876",
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "companyName": "Acme Corporation",
+  "email": "max.mustermann@acme.com",
+  "phone": "+49 89 12345678",
+  "mobile": "+49 176 98765432",
+  "address": {
+    "street": "Hauptstraße 123",
+    "city": "Munich",
+    "postalCode": "80331",
+    "country": "Germany"
+  },
+  "billingAddress": {
+    "street": "Nebenstraße 456",
+    "city": "Berlin",
+    "postalCode": "10115",
+    "country": "Germany"
+  },
+  "customerType": "business",
+  "taxId": "DE123456789",
+  "createdDate": "2024-01-15T08:00:00Z",
+  "status": "active",
+  "creditLimit": 50000.0,
+  "defaultPayment": {
+    "iban": "DE89370400440532013000",
+    "bic": "DEUTDEFF"
+  },
+  "notes": "Premium customer with priority support",
+  "account": {
+    "customerNumber": "CUST-9876",
+    "website": "https://www.acme-corp.example",
+    "industry": [
+      "Technology",
+      "Solar Energy"
+    ],
+    "companySize": "100-249"
+  }
+}

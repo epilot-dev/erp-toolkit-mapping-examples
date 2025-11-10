@@ -1,0 +1,36 @@
+{
+  "orderId": "ORD-2024-12345",
+  "orderDate": "2024-10-21T10:30:00Z",
+  "customer": {
+    "customerId": "CUST-9876",
+    "name": "Acme Corporation",
+    "email": "contact@acme.com",
+    "phone": "+49 89 12345678"
+  },
+  "items": [
+    {
+      "productId": "PROD-001",
+      "productName": "Solar Panel 400W",
+      "quantity": 10,
+      "unitPrice": 299.99,
+      "totalPrice": 2999.9
+    },
+    {
+      "productId": "PROD-002",
+      "productName": "Installation Service",
+      "quantity": 1,
+      "unitPrice": 500.0,
+      "totalPrice": 500.0
+    }
+  ],
+  "shippingAddress": {
+    "street": "Hauptstraße 123",
+    "city": "Munich",
+    "postalCode": "80331",
+    "country": "Germany"
+  },
+  "totalAmount": 3499.9,
+  "currency": "EUR",
+  "status": "pending",
+  "deliveryDate": "2024-11-15"
+}
