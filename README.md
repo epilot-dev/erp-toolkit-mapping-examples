@@ -2,7 +2,7 @@
 
 This repository demonstrates how to use [epilot's ERP Integration Toolkit](https://docs.epilot.io/docs/integrations/erp-toolkit-mapping) mapping configuration (v2.0) to transform ERP system events into epilot entities.
 
-## 📚 Resources
+## Resources
 
 - **[ERP Toolkit Mapping Documentation](https://docs.epilot.io/docs/integrations/erp-toolkit-mapping)** - Complete guide on mapping configuration
 - **[Interactive Mapping Playground](https://portal.epilot.cloud/app/integrations)** - Test and debug your mappings in the epilot portal
@@ -11,7 +11,7 @@ This repository demonstrates how to use [epilot's ERP Integration Toolkit](https
 - **[epilot API Documentation](https://docs.epilot.io/api)** - API reference
 - **[epilot SDK](https://github.com/epilot-dev/sdk-js)** - JavaScript/TypeScript SDK
 
-## 🎯 What's Included
+## What's Included
 
 This repository contains complete, working examples of:
 
@@ -26,21 +26,31 @@ Maps an ERP order to two epilot entities:
 - **Contact** - Customer from order
 - **Order** - Order details with line items
 
-## 📁 Repository Structure
+### ContractChanged Event
+Maps an ERP power contract with meter data to multiple epilot entities:
+- **Contract** - Service agreement with tariff details
+- **Meter** - Smart meter device information
+- **Meter Counter** - Peak (HT) and off-peak (NT) counters for dual-tariff metering
+- **Meter Readings** - 4 monthly readings demonstrating the `meter_readings` mapping feature
+
+## Repository Structure
 
 ```
 .
 ├── samples/
-│   ├── mapping.json                    # Mapping configuration (v2.0)
+│   ├── mapping.CustomerChanged.json    # CustomerChanged event configuration
+│   ├── mapping.OrderChanged.json       # OrderChanged event configuration
+│   ├── mapping.ContractChanged.json    # ContractChanged event configuration (with meter_readings)
 │   ├── payload.customer.json           # Sample CustomerChanged event
-│   └── payload.order.json              # Sample OrderChanged event
+│   ├── payload.order.json              # Sample OrderChanged event
+│   └── payload.contract.json           # Sample ContractChanged event (with meter readings)
 ├── tests/
 │   └── sample-mappings.test.ts         # Integration tests with expected outputs
 ├── package.json
 └── README.md
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -81,36 +91,43 @@ npm run test:watch
 
 The tests will validate that the sample events are correctly transformed into epilot entities according to the mapping configuration.
 
-## 🔍 Exploring the Examples
+## Exploring the Examples
 
-### 1. Review the Mapping Configuration
+### 1. Review the Mapping Configurations
 
-Open [`samples/mapping.json`](./samples/mapping.json) to see the complete mapping configuration. Key concepts demonstrated:
+Each event type has its own mapping configuration file in `samples/`:
 
-- **Event-based mapping** (v2.0 format)
-- **Multiple entities per event**
+- [`mapping.CustomerChanged.json`](./samples/mapping.CustomerChanged.json) - Customer to contact, account, and billing account
+- [`mapping.OrderChanged.json`](./samples/mapping.OrderChanged.json) - Order with line items and customer relation
+- [`mapping.ContractChanged.json`](./samples/mapping.ContractChanged.json) - Contract with meter, counters, and meter readings
+
+Key concepts demonstrated:
+- **Entity mapping** with unique identifiers
 - **JSONata expressions** for complex transformations
 - **Multi-value attributes** (arrays with tags)
 - **Entity relations** with `_set` operation
 - **Conditional entity creation**
+- **Array iteration** with entity-level `jsonataExpression`
+- **Meter readings mapping** for energy/utility data
 
 ### 2. Examine Sample Payloads
 
-- [`samples/payload.customer.json`](./samples/payload.customer.json) - Business customer with addresses, contacts, and payment info
-- [`samples/payload.order.json`](./samples/payload.order.json) - Order with line items and customer reference
+- [`payload.customer.json`](./samples/payload.customer.json) - Business customer with addresses, contacts, and payment info
+- [`payload.order.json`](./samples/payload.order.json) - Order with line items and customer reference
+- [`payload.contract.json`](./samples/payload.contract.json) - Power contract with smart meter, dual-tariff counters, and monthly readings
 
 ### 3. Check Expected Outputs
 
 The test file [`tests/sample-mappings.test.ts`](./tests/sample-mappings.test.ts) shows the exact output expected for each entity using `toMatchObject` assertions. This serves as living documentation of the transformation.
 
-## 📖 Key Mapping Features Demonstrated
+## Key Mapping Features Demonstrated
 
 ### Field Mapping Types
 
 ```json
 {
   "attribute": "external_id",
-  "field": "customerId"                    // ✅ Direct field mapping
+  "field": "customerId"
 }
 ```
 
@@ -118,7 +135,7 @@ The test file [`tests/sample-mappings.test.ts`](./tests/sample-mappings.test.ts)
 {
   "attribute": "full_name",
   "jsonataExpression": "customerType = 'business' ? companyName : (firstName & ' ' & lastName)"
-}                                          // ✅ JSONata transformation
+}
 ```
 
 ### Multi-Value Attributes with Tags
@@ -127,7 +144,7 @@ The test file [`tests/sample-mappings.test.ts`](./tests/sample-mappings.test.ts)
 {
   "attribute": "email",
   "jsonataExpression": "$exists(email) ? [{ \"_tags\": [\"Primary\"], \"email\": email }] : undefined"
-}                                          // ✅ Array with tags
+}
 ```
 
 ### Entity Relations
@@ -136,7 +153,7 @@ The test file [`tests/sample-mappings.test.ts`](./tests/sample-mappings.test.ts)
 {
   "attribute": "account",
   "relations": {
-    "operation": "_set",                   // ✅ Relation operation
+    "operation": "_set",
     "items": [{
       "entity_schema": "account",
       "unique_ids": [{
@@ -153,29 +170,66 @@ The test file [`tests/sample-mappings.test.ts`](./tests/sample-mappings.test.ts)
 ```json
 {
   "entity_schema": "account",
-  "condition": "customerType = 'business'", // ✅ Only create for business customers
+  "condition": "customerType = 'business'",
   "fields": [...]
 }
 ```
 
-## 🧪 Understanding the Tests
+### Array Iteration (Multiple Entities from Array)
 
-Each test validates the complete transformation for one entity:
+```json
+{
+  "entity_schema": "meter_counter",
+  "jsonataExpression": "meter.counters",
+  "unique_ids": ["external_id"],
+  "fields": [
+    { "attribute": "external_id", "field": "counterId" },
+    { "attribute": "tariff_type", "field": "tariffType" }
+  ]
+}
+```
+
+### Meter Readings Mapping
+
+```json
+{
+  "meter_readings": [{
+    "jsonataExpression": "meterReadings",
+    "meter": {
+      "unique_ids": [{ "attribute": "external_id", "field": "meterId" }]
+    },
+    "meter_counter": {
+      "unique_ids": [{ "attribute": "external_id", "field": "counterId" }]
+    },
+    "fields": [
+      { "attribute": "external_id", "field": "readingId" },
+      { "attribute": "timestamp", "field": "timestamp" },
+      { "attribute": "value", "jsonataExpression": "$string(value)" },
+      { "attribute": "source", "field": "source" }
+    ]
+  }]
+}
+```
+
+## Understanding the Tests
+
+Each test validates the complete transformation for one entity using the `simulateMappingV2` endpoint:
 
 ```typescript
 it('should map to contact entity', async () => {
-  const response = await erpClient.simulateMapping(null, {
-    mapping_configuration: mappingConfig,
-    object_type: 'CustomerChanged',
+  const eventConfig = loadEventConfig('CustomerChanged');
+  const event = loadInboundEvent('customer');
+
+  const response = await erpClient.simulateMappingV2(null, {
+    event_configuration: eventConfig,
     format: 'json',
-    payload: JSON.stringify(event),
+    payload: event,
   });
 
   const contactUpdate = response.data.entity_updates.find(
     (update) => update.entity_slug === 'contact'
   );
 
-  // Expected output documented here
   expect(contactUpdate).toMatchObject({
     entity_slug: 'contact',
     attributes: {
@@ -188,14 +242,40 @@ it('should map to contact entity', async () => {
 });
 ```
 
-## 🔧 Customizing for Your Use Case
+For meter readings:
 
-1. **Modify the mapping** in `samples/mapping.json` to match your ERP data structure
-2. **Update sample payloads** in `samples/*.json` with your actual event format
+```typescript
+it('should map 4 meter readings', async () => {
+  const response = await erpClient.simulateMappingV2(null, {
+    event_configuration: eventConfig,
+    format: 'json',
+    payload: event,
+  });
+
+  const meterReadings = response.data.meter_readings_updates;
+
+  expect(meterReadings).toHaveLength(4);
+  expect(meterReadings[0]).toMatchObject({
+    meter: { $entity_unique_ids: { external_id: 'MTR-001234' } },
+    meter_counter: { $entity_unique_ids: { external_id: 'CNT-001234-HT' } },
+    attributes: {
+      external_id: 'RDG-2024-001',
+      timestamp: '2024-10-01T00:00:00Z',
+      value: '12345.67',
+      source: 'ERP'
+    }
+  });
+});
+```
+
+## Customizing for Your Use Case
+
+1. **Create a new mapping** file in `samples/mapping.YourEvent.json`
+2. **Add sample payload** in `samples/payload.yourevent.json`
 3. **Run tests** to validate your mappings work correctly
 4. **Deploy** the mapping configuration to your epilot organization
 
-## 📝 Common Use Cases
+## Common Use Cases
 
 ### Adding a New Field
 
