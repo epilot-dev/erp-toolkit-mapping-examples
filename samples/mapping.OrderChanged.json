@@ -1,0 +1,99 @@
+{
+  "entities": [
+    {
+      "entity_schema": "contact",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "fields": [
+        {
+          "attribute": "external_id",
+          "jsonataExpression": "customer.customerId"
+        },
+        {
+          "attribute": "full_name",
+          "jsonataExpression": "customer.name"
+        },
+        {
+          "attribute": "email",
+          "jsonataExpression": "$exists(customer.email) and customer.email != '' ? [\n  {\n    \"_tags\": [\"Primary\"],\n    \"email\": customer.email\n  }\n] : undefined"
+        },
+        {
+          "attribute": "phone",
+          "jsonataExpression": "$exists(customer.phone) and customer.phone != '' ? [\n  {\n    \"_tags\": [\"Primary\"],\n    \"phone\": customer.phone\n  }\n] : undefined"
+        }
+      ]
+    },
+    {
+      "entity_schema": "order",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "fields": [
+        {
+          "attribute": "external_id",
+          "field": "orderId"
+        },
+        {
+          "attribute": "order_number",
+          "field": "orderId"
+        },
+        {
+          "attribute": "order_date",
+          "field": "orderDate"
+        },
+        {
+          "attribute": "status",
+          "field": "status"
+        },
+        {
+          "attribute": "total_amount_decimal",
+          "jsonataExpression": "$exists(totalAmount) ? $formatNumber($number(totalAmount), '#0.00') : '0.00'"
+        },
+        {
+          "attribute": "total_amount",
+          "jsonataExpression": "$exists(totalAmount) ? $string($round($number(totalAmount) * 100)) : '0'"
+        },
+        {
+          "attribute": "total_amount_currency",
+          "field": "currency"
+        },
+        {
+          "attribute": "delivery_date",
+          "jsonataExpression": "(\n  $date := deliveryDate;\n  $exists($date) and $date != '' ? $date : undefined\n)"
+        },
+        {
+          "attribute": "shipping_address",
+          "jsonataExpression": "(\n  $shippingAddr := shippingAddress;\n  $exists($shippingAddr) ? [\n    {\n      \"street\": $shippingAddr.street,\n      \"postal_code\": $exists($shippingAddr.postalCode) ? $string($shippingAddr.postalCode) : undefined,\n      \"city\": $shippingAddr.city,\n      \"country\": $shippingAddr.country\n    }\n  ] : undefined\n)"
+        },
+        {
+          "attribute": "order_items",
+          "jsonataExpression": "(\n  $items := items;\n  $exists($items) and $count($items) > 0 ? $items.{\n    \"_tags\": [productId],\n    \"product_id\": productId,\n    \"product_name\": productName,\n    \"quantity\": $string(quantity),\n    \"unit_price\": $formatNumber($number(unitPrice), '#0.00'),\n    \"total_price\": $formatNumber($number(totalPrice), '#0.00')\n  } : undefined\n)"
+        },
+        {
+          "attribute": "item_count",
+          "jsonataExpression": "$count(items)"
+        },
+        {
+          "attribute": "customer",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "contact",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "jsonataExpression": "customer.customerId"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

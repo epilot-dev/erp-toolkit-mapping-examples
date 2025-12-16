@@ -24,6 +24,6 @@
     "vitest": "^1.0.4"
   },
   "dependencies": {
-    "@epilot/erp-integration-client": "^0.5.2"
+    "@epilot/erp-integration-client": "^0.13.0"
   }
 }

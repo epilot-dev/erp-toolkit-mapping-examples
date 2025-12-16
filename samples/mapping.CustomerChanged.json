@@ -1,0 +1,184 @@
+{
+  "entities": [
+    {
+      "entity_schema": "contact",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "fields": [
+        {
+          "attribute": "external_id",
+          "field": "customerId"
+        },
+        {
+          "attribute": "first_name",
+          "jsonataExpression": "$exists(firstName) and firstName != '' ? firstName : undefined"
+        },
+        {
+          "attribute": "last_name",
+          "field": "lastName"
+        },
+        {
+          "attribute": "company_name",
+          "jsonataExpression": "customerType = 'business' ? companyName : undefined"
+        },
+        {
+          "attribute": "customer_type",
+          "field": "customerType"
+        },
+        {
+          "attribute": "tax_id",
+          "jsonataExpression": "$exists(taxId) and taxId != '' ? taxId : undefined"
+        },
+        {
+          "attribute": "status",
+          "field": "status"
+        },
+        {
+          "attribute": "full_name",
+          "jsonataExpression": "customerType = 'business' ? companyName : (firstName & ' ' & lastName)"
+        },
+        {
+          "attribute": "email",
+          "jsonataExpression": "(\n  $mainEmail := $exists(email) and email != '' ? [\n    {\n      \"_tags\": [\"Primary\"],\n      \"email\": email\n    }\n  ] : [];\n  $count($mainEmail) > 0 ? $mainEmail : undefined\n)"
+        },
+        {
+          "attribute": "phone",
+          "jsonataExpression": "(\n  $mainPhone := $exists(phone) and phone != '' ? [\n    {\n      \"_tags\": [\"Primary\"],\n      \"phone\": phone\n    }\n  ] : [];\n  \n  $mobilePhone := $exists(mobile) and mobile != '' ? [\n    {\n      \"_tags\": [\"Mobile\"],\n      \"phone\": mobile\n    }\n  ] : [];\n  \n  $allPhones := $append($mainPhone, $mobilePhone);\n  $count($allPhones) > 0 ? $allPhones : undefined\n)"
+        },
+        {
+          "attribute": "address",
+          "jsonataExpression": "(\n  $mainAddress := $exists(address) ? [\n    {\n      \"_tags\": [\"Primary Address\"],\n      \"street\": address.street,\n      \"postal_code\": $exists(address.postalCode) ? $string(address.postalCode) : undefined,\n      \"city\": address.city,\n      \"country\": address.country\n    }\n  ] : [];\n  \n  $billingAddr := $exists(billingAddress) and billingAddress.street != '' ? [\n    {\n      \"_tags\": [\"Billing Address\"],\n      \"street\": billingAddress.street,\n      \"postal_code\": $exists(billingAddress.postalCode) ? $string(billingAddress.postalCode) : undefined,\n      \"city\": billingAddress.city,\n      \"country\": billingAddress.country\n    }\n  ] : [];\n  \n  $allAddresses := $append($mainAddress, $billingAddr);\n  $count($allAddresses) > 0 ? $allAddresses : undefined\n)"
+        },
+        {
+          "attribute": "account",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "account",
+                "unique_ids": [
+                  {
+                    "attribute": "customer_number",
+                    "jsonataExpression": "customerId"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "entity_schema": "account",
+      "unique_ids": [
+        "customer_number"
+      ],
+      "enabled": true,
+      "condition": "customerType = 'business'",
+      "fields": [
+        {
+          "attribute": "customer_number",
+          "field": "customerId"
+        },
+        {
+          "attribute": "name",
+          "field": "companyName"
+        },
+        {
+          "attribute": "tax_id",
+          "jsonataExpression": "$exists(taxId) and taxId != '' ? taxId : undefined"
+        },
+        {
+          "attribute": "website",
+          "jsonataExpression": "$exists(account.website) and account.website != '' ? account.website : undefined"
+        },
+        {
+          "attribute": "industry",
+          "jsonataExpression": "$exists(account.industry) ? account.industry : undefined"
+        },
+        {
+          "attribute": "company_size",
+          "jsonataExpression": "$exists(account.companySize) ? account.companySize : undefined"
+        },
+        {
+          "attribute": "email",
+          "jsonataExpression": "(\n  $mainEmail := $exists(email) and email != '' ? [\n    {\n      \"_tags\": [\"Primary\"],\n      \"email\": email\n    }\n  ] : [];\n  $count($mainEmail) > 0 ? $mainEmail : undefined\n)"
+        },
+        {
+          "attribute": "phone",
+          "jsonataExpression": "(\n  $mainPhone := $exists(phone) and phone != '' ? [\n    {\n      \"_tags\": [\"Primary\"],\n      \"phone\": phone\n    }\n  ] : [];\n  \n  $mobilePhone := $exists(mobile) and mobile != '' ? [\n    {\n      \"_tags\": [\"Mobile\"],\n      \"phone\": mobile\n    }\n  ] : [];\n  \n  $allPhones := $append($mainPhone, $mobilePhone);\n  $count($allPhones) > 0 ? $allPhones : undefined\n)"
+        },
+        {
+          "attribute": "address",
+          "jsonataExpression": "(\n  $mainAddress := $exists(address) ? [\n    {\n      \"_tags\": [\"Primary Address\"],\n      \"street\": address.street,\n      \"postal_code\": $exists(address.postalCode) ? $string(address.postalCode) : undefined,\n      \"city\": address.city,\n      \"country\": address.country\n    }\n  ] : [];\n  \n  $billingAddr := $exists(billingAddress) and billingAddress.street != '' ? [\n    {\n      \"_tags\": [\"Billing Address\"],\n      \"street\": billingAddress.street,\n      \"postal_code\": $exists(billingAddress.postalCode) ? $string(billingAddress.postalCode) : undefined,\n      \"city\": billingAddress.city,\n      \"country\": billingAddress.country\n    }\n  ] : [];\n  \n  $allAddresses := $append($mainAddress, $billingAddr);\n  $count($allAddresses) > 0 ? $allAddresses : undefined\n)"
+        },
+        {
+          "attribute": "payment",
+          "jsonataExpression": "(\n  $hasPayment := $exists(defaultPayment) and $exists(defaultPayment.iban) and defaultPayment.iban != '';\n  $payment := $hasPayment ? [\n    {\n      \"type\": \"payment_sepa\",\n      \"data\": {\n        \"iban\": defaultPayment.iban,\n        \"bic_number\": $exists(defaultPayment.bic) ? defaultPayment.bic : undefined,\n        \"fullname\": companyName\n      }\n    }\n  ] : [];\n  $count($payment) > 0 ? $payment : undefined\n)"
+        },
+        {
+          "attribute": "contacts",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "contact",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "jsonataExpression": "customerId"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "entity_schema": "billing_account",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "condition": "customerType = 'business' and $exists(defaultPayment) and $exists(defaultPayment.iban)",
+      "fields": [
+        {
+          "attribute": "external_id",
+          "field": "customerId"
+        },
+        {
+          "attribute": "billing_account_number",
+          "field": "customerId"
+        },
+        {
+          "attribute": "billing_address",
+          "jsonataExpression": "$exists(billingAddress) ? {\n  \"_tags\": [\"Billing\"],\n  \"street\": billingAddress.street,\n  \"postal_code\": $exists(billingAddress.postalCode) ? $string(billingAddress.postalCode) : undefined,\n  \"city\": billingAddress.city,\n  \"country\": billingAddress.country\n} : undefined"
+        },
+        {
+          "attribute": "payment_method",
+          "jsonataExpression": "(\n  $hasPayment := $exists(defaultPayment) and $exists(defaultPayment.iban) and defaultPayment.iban != '';\n  $payment := $hasPayment ? [\n    {\n      \"type\": \"payment_sepa\",\n      \"data\": {\n        \"iban\": defaultPayment.iban,\n        \"bic_number\": $exists(defaultPayment.bic) ? defaultPayment.bic : undefined,\n        \"fullname\": companyName\n      }\n    }\n  ] : [];\n  $count($payment) > 0 ? $payment : undefined\n)"
+        },
+        {
+          "attribute": "billing_contact",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "contact",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "jsonataExpression": "customerId"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

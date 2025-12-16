@@ -4,7 +4,7 @@
  * These tests validate that the sample mapping configuration correctly
  * transforms customer and order data into epilot contact and order entities.
  *
- * The tests use the simulateMapping endpoint to verify mappings without persisting data.
+ * The tests use the simulateMappingV2 endpoint to verify mappings without persisting data.
  */
 
 import { describe, expect, it, vi, beforeAll } from 'vitest';
@@ -29,8 +29,8 @@ const erpClient = getClient();
 erpClient.defaults.headers.common['Authorization'] = `Bearer ${API_TOKEN}`;
 erpClient.defaults.validateStatus = () => true;
 
-const loadMappingConfig = (): any => {
-  const mappingPath = join(__dirname, '../samples/mapping.json');
+const loadEventConfig = (eventName: string): any => {
+  const mappingPath = join(__dirname, `../samples/mapping.${eventName}.json`);
   const mappingContent = readFileSync(mappingPath, 'utf-8');
   return JSON.parse(mappingContent);
 };
@@ -48,14 +48,13 @@ describe('Sample Mappings', () => {
 
   describe('CustomerChanged', () => {
     it('should map to contact entity', async () => {
-      const mappingConfig = loadMappingConfig();
+      const eventConfig = loadEventConfig('CustomerChanged');
       const event = loadInboundEvent('customer');
 
-      const response = await erpClient.simulateMapping(null, {
-        mapping_configuration: mappingConfig,
-        object_type: 'CustomerChanged',
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
         format: 'json',
-        payload: JSON.stringify(event),
+        payload: event,
       });
 
       const contactUpdate = response.data.entity_updates.find(
@@ -115,14 +114,13 @@ describe('Sample Mappings', () => {
     });
 
     it('should map to account entity', async () => {
-      const mappingConfig = loadMappingConfig();
+      const eventConfig = loadEventConfig('CustomerChanged');
       const event = loadInboundEvent('customer');
 
-      const response = await erpClient.simulateMapping(null, {
-        mapping_configuration: mappingConfig,
-        object_type: 'CustomerChanged',
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
         format: 'json',
-        payload: JSON.stringify(event),
+        payload: event,
       });
 
       const accountUpdate = response.data.entity_updates.find(
@@ -190,14 +188,13 @@ describe('Sample Mappings', () => {
     });
 
     it('should map to billing_account entity', async () => {
-      const mappingConfig = loadMappingConfig();
+      const eventConfig = loadEventConfig('CustomerChanged');
       const event = loadInboundEvent('customer');
 
-      const response = await erpClient.simulateMapping(null, {
-        mapping_configuration: mappingConfig,
-        object_type: 'CustomerChanged',
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
         format: 'json',
-        payload: JSON.stringify(event),
+        payload: event,
       });
 
       const billingAccountUpdate = response.data.entity_updates.find(
@@ -238,14 +235,13 @@ describe('Sample Mappings', () => {
 
   describe('OrderChanged', () => {
     it('should map to contact entity', async () => {
-      const mappingConfig = loadMappingConfig();
+      const eventConfig = loadEventConfig('OrderChanged');
       const event = loadInboundEvent('order');
 
-      const response = await erpClient.simulateMapping(null, {
-        mapping_configuration: mappingConfig,
-        object_type: 'OrderChanged',
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
         format: 'json',
-        payload: JSON.stringify(event),
+        payload: event,
       });
 
       const contactUpdate = response.data.entity_updates.find(
@@ -274,14 +270,13 @@ describe('Sample Mappings', () => {
     });
 
     it('should map to order entity', async () => {
-      const mappingConfig = loadMappingConfig();
+      const eventConfig = loadEventConfig('OrderChanged');
       const event = loadInboundEvent('order');
 
-      const response = await erpClient.simulateMapping(null, {
-        mapping_configuration: mappingConfig,
-        object_type: 'OrderChanged',
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
         format: 'json',
-        payload: JSON.stringify(event),
+        payload: event,
       });
 
       const orderUpdate = response.data.entity_updates.find(
