@@ -116,7 +116,7 @@
         },
         {
           "attribute": "meter_type",
-          "jsonataExpression": "meter.meterType"
+          "jsonataExpression": "(\n  $meterTypeMap := {\n    \"SMART\": \"smart-meter\",\n    \"IMS\": \"intelligent-measuring-system\",\n    \"TP\": \"three-phase-meter\",\n    \"AC\": \"alternating-current-meter\",\n    \"EM\": \"electronic-meter\"\n  };\n  $lookup($meterTypeMap, meter.meterType) ? $lookup($meterTypeMap, meter.meterType) : \"electronic-meter\"\n)"
         },
         {
           "attribute": "manufacturer",

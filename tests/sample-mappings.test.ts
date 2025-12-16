@@ -401,7 +401,7 @@ describe('Sample Mappings', () => {
         attributes: {
           external_id: 'MTR-001234',
           meter_number: '1EMH0012345678',
-          meter_type: 'smart_meter',
+          meter_type: 'smart-meter',
           manufacturer: 'EMH Metering',
           model: 'eHZ-IW8E2A5',
           installation_date: '2023-06-15',

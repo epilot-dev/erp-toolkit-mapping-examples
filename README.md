@@ -189,6 +189,17 @@ The test file [`tests/sample-mappings.test.ts`](./tests/sample-mappings.test.ts)
 }
 ```
 
+### Enum/Value Mapping
+
+```json
+{
+  "attribute": "meter_type",
+  "jsonataExpression": "(\n  $meterTypeMap := {\n    \"SMART\": \"smart-meter\",\n    \"IMS\": \"intelligent-measuring-system\",\n    \"TP\": \"three-phase-meter\",\n    \"AC\": \"alternating-current-meter\",\n    \"EM\": \"electronic-meter\"\n  };\n  $lookup($meterTypeMap, meter.meterType) ? $lookup($meterTypeMap, meter.meterType) : \"electronic-meter\"\n)"
+}
+```
+
+This pattern uses a JSONata object as a lookup table to map ERP enum values to epilot values, with a default fallback.
+
 ### Meter Readings Mapping
 
 ```json

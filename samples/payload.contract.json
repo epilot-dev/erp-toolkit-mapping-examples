@@ -23,7 +23,7 @@
   "meter": {
     "meterId": "MTR-001234",
     "meterNumber": "1EMH0012345678",
-    "meterType": "smart_meter",
+    "meterType": "SMART",
     "manufacturer": "EMH Metering",
     "model": "eHZ-IW8E2A5",
     "installationDate": "2023-06-15",
