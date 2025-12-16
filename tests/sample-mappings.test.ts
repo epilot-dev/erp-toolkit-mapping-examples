@@ -2,7 +2,7 @@
  * Integration tests for ERP Integration API mapping configuration
  *
  * These tests validate that the sample mapping configuration correctly
- * transforms customer and order data into epilot contact and order entities.
+ * transforms customer, order, and contract data into epilot entities.
  *
  * The tests use the simulateMappingV2 endpoint to verify mappings without persisting data.
  */
@@ -326,6 +326,264 @@ describe('Sample Mappings', () => {
               _set: expect.any(Array)
             }
           }
+        }
+      });
+    });
+  });
+
+  describe('ContractChanged', () => {
+    it('should map to contract entity', async () => {
+      const eventConfig = loadEventConfig('ContractChanged');
+      const event = loadInboundEvent('contract');
+
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
+        format: 'json',
+        payload: event,
+      });
+
+      const contractUpdate = response.data.entity_updates.find(
+        (update: { entity_slug: string }) => update.entity_slug === 'contract'
+      );
+
+      expect(contractUpdate).toMatchObject({
+        entity_slug: 'contract',
+        attributes: {
+          external_id: 'CON-2024-5678',
+          contract_number: 'PWR-2024-5678',
+          contract_type: 'power',
+          status: 'active',
+          contract_start_date: '2024-01-01',
+          contract_end_date: '2025-12-31',
+          billing_period: 'monthly',
+          payment_method: 'direct_debit',
+          tariff_name: 'Green Energy Basic',
+          price_per_unit: '0.32',
+          base_fee: '12.5',
+          currency: 'EUR',
+          delivery_address: {
+            street: 'Hauptstraße 123',
+            postal_code: '80331',
+            city: 'Munich',
+            country: 'Germany'
+          },
+          description: 'Switched from old tariff on 2024-01-01',
+          customer: {
+            $relation: {
+              _set: expect.any(Array)
+            }
+          },
+          meters: {
+            $relation: {
+              _set: expect.any(Array)
+            }
+          }
+        }
+      });
+    });
+
+    it('should map to meter entity', async () => {
+      const eventConfig = loadEventConfig('ContractChanged');
+      const event = loadInboundEvent('contract');
+
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
+        format: 'json',
+        payload: event,
+      });
+
+      const meterUpdate = response.data.entity_updates.find(
+        (update: { entity_slug: string }) => update.entity_slug === 'meter'
+      );
+
+      expect(meterUpdate).toMatchObject({
+        entity_slug: 'meter',
+        attributes: {
+          external_id: 'MTR-001234',
+          meter_number: '1EMH0012345678',
+          meter_type: 'smart_meter',
+          manufacturer: 'EMH Metering',
+          model: 'eHZ-IW8E2A5',
+          installation_date: '2023-06-15',
+          location: 'Basement',
+          customer: {
+            $relation: {
+              _set: expect.any(Array)
+            }
+          },
+          contract: {
+            $relation: {
+              _set: expect.any(Array)
+            }
+          }
+        }
+      });
+    });
+
+    it('should map to meter_counter entities (peak and off-peak)', async () => {
+      const eventConfig = loadEventConfig('ContractChanged');
+      const event = loadInboundEvent('contract');
+
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
+        format: 'json',
+        payload: event,
+      });
+
+      const meterCounterUpdates = response.data.entity_updates.filter(
+        (update: { entity_slug: string }) => update.entity_slug === 'meter_counter'
+      );
+
+      expect(meterCounterUpdates).toHaveLength(2);
+
+      // Peak counter (HT)
+      const peakCounter = meterCounterUpdates.find(
+        (update: any) => update.attributes.external_id === 'CNT-001234-HT'
+      );
+      expect(peakCounter).toMatchObject({
+        entity_slug: 'meter_counter',
+        attributes: {
+          external_id: 'CNT-001234-HT',
+          counter_number: '1.8.1',
+          counter_type: 'consumption',
+          tariff_type: 'peak',
+          unit: 'kWh',
+          direction: 'import'
+        }
+      });
+
+      // Off-peak counter (NT)
+      const offPeakCounter = meterCounterUpdates.find(
+        (update: any) => update.attributes.external_id === 'CNT-001234-NT'
+      );
+      expect(offPeakCounter).toMatchObject({
+        entity_slug: 'meter_counter',
+        attributes: {
+          external_id: 'CNT-001234-NT',
+          counter_number: '1.8.2',
+          counter_type: 'consumption',
+          tariff_type: 'off_peak',
+          unit: 'kWh',
+          direction: 'import'
+        }
+      });
+    });
+
+    it('should map 4 meter readings', async () => {
+      const eventConfig = loadEventConfig('ContractChanged');
+      const event = loadInboundEvent('contract');
+
+      const response = await erpClient.simulateMappingV2(null, {
+        event_configuration: eventConfig,
+        format: 'json',
+        payload: event,
+      });
+
+      const meterReadings = response.data.meter_readings_updates ?? [];
+
+      expect(meterReadings).toHaveLength(4);
+
+      // October peak reading
+      const octPeakReading = meterReadings.find(
+        (reading: any) => reading.attributes.external_id === 'RDG-2024-001'
+      );
+      expect(octPeakReading).toMatchObject({
+        meter: {
+          $entity_unique_ids: {
+            external_id: 'MTR-001234'
+          }
+        },
+        meter_counter: {
+          $entity_unique_ids: {
+            external_id: 'CNT-001234-HT'
+          }
+        },
+        attributes: {
+          external_id: 'RDG-2024-001',
+          timestamp: '2024-10-01T00:00:00Z',
+          value: '12345.67',
+          unit: 'kWh',
+          source: 'ERP',
+          reading_type: 'regular',
+          reason: 'monthly_billing'
+        }
+      });
+
+      // October off-peak reading
+      const octOffPeakReading = meterReadings.find(
+        (reading: any) => reading.attributes.external_id === 'RDG-2024-002'
+      );
+      expect(octOffPeakReading).toMatchObject({
+        meter: {
+          $entity_unique_ids: {
+            external_id: 'MTR-001234'
+          }
+        },
+        meter_counter: {
+          $entity_unique_ids: {
+            external_id: 'CNT-001234-NT'
+          }
+        },
+        attributes: {
+          external_id: 'RDG-2024-002',
+          timestamp: '2024-10-01T00:00:00Z',
+          value: '5432.1',
+          unit: 'kWh',
+          source: 'ERP',
+          reading_type: 'regular',
+          reason: 'monthly_billing'
+        }
+      });
+
+      // November peak reading
+      const novPeakReading = meterReadings.find(
+        (reading: any) => reading.attributes.external_id === 'RDG-2024-003'
+      );
+      expect(novPeakReading).toMatchObject({
+        meter: {
+          $entity_unique_ids: {
+            external_id: 'MTR-001234'
+          }
+        },
+        meter_counter: {
+          $entity_unique_ids: {
+            external_id: 'CNT-001234-HT'
+          }
+        },
+        attributes: {
+          external_id: 'RDG-2024-003',
+          timestamp: '2024-11-01T00:00:00Z',
+          value: '12890.45',
+          unit: 'kWh',
+          source: 'ERP',
+          reading_type: 'regular',
+          reason: 'monthly_billing'
+        }
+      });
+
+      // November off-peak reading
+      const novOffPeakReading = meterReadings.find(
+        (reading: any) => reading.attributes.external_id === 'RDG-2024-004'
+      );
+      expect(novOffPeakReading).toMatchObject({
+        meter: {
+          $entity_unique_ids: {
+            external_id: 'MTR-001234'
+          }
+        },
+        meter_counter: {
+          $entity_unique_ids: {
+            external_id: 'CNT-001234-NT'
+          }
+        },
+        attributes: {
+          external_id: 'RDG-2024-004',
+          timestamp: '2024-11-01T00:00:00Z',
+          value: '5678.9',
+          unit: 'kWh',
+          source: 'ERP',
+          reading_type: 'regular',
+          reason: 'monthly_billing'
         }
       });
     });

@@ -1,0 +1,97 @@
+{
+  "contractId": "CON-2024-5678",
+  "contractNumber": "PWR-2024-5678",
+  "contractType": "power",
+  "status": "active",
+  "startDate": "2024-01-01",
+  "endDate": "2025-12-31",
+  "customerId": "CUST-9876",
+  "tariff": {
+    "name": "Green Energy Basic",
+    "pricePerKwh": 0.32,
+    "baseFee": 12.50,
+    "currency": "EUR"
+  },
+  "billingCycle": "monthly",
+  "paymentMethod": "direct_debit",
+  "deliveryAddress": {
+    "street": "Hauptstraße 123",
+    "city": "Munich",
+    "postalCode": "80331",
+    "country": "Germany"
+  },
+  "meter": {
+    "meterId": "MTR-001234",
+    "meterNumber": "1EMH0012345678",
+    "meterType": "smart_meter",
+    "manufacturer": "EMH Metering",
+    "model": "eHZ-IW8E2A5",
+    "installationDate": "2023-06-15",
+    "location": "Basement",
+    "counters": [
+      {
+        "counterId": "CNT-001234-HT",
+        "counterNumber": "1.8.1",
+        "counterType": "consumption",
+        "tariffType": "peak",
+        "unit": "kWh",
+        "direction": "import"
+      },
+      {
+        "counterId": "CNT-001234-NT",
+        "counterNumber": "1.8.2",
+        "counterType": "consumption",
+        "tariffType": "off_peak",
+        "unit": "kWh",
+        "direction": "import"
+      }
+    ]
+  },
+  "meterReadings": [
+    {
+      "readingId": "RDG-2024-001",
+      "meterId": "MTR-001234",
+      "counterId": "CNT-001234-HT",
+      "timestamp": "2024-10-01T00:00:00Z",
+      "value": 12345.67,
+      "unit": "kWh",
+      "source": "ERP",
+      "readingType": "regular",
+      "reason": "monthly_billing"
+    },
+    {
+      "readingId": "RDG-2024-002",
+      "meterId": "MTR-001234",
+      "counterId": "CNT-001234-NT",
+      "timestamp": "2024-10-01T00:00:00Z",
+      "value": 5432.10,
+      "unit": "kWh",
+      "source": "ERP",
+      "readingType": "regular",
+      "reason": "monthly_billing"
+    },
+    {
+      "readingId": "RDG-2024-003",
+      "meterId": "MTR-001234",
+      "counterId": "CNT-001234-HT",
+      "timestamp": "2024-11-01T00:00:00Z",
+      "value": 12890.45,
+      "unit": "kWh",
+      "source": "ERP",
+      "readingType": "regular",
+      "reason": "monthly_billing"
+    },
+    {
+      "readingId": "RDG-2024-004",
+      "meterId": "MTR-001234",
+      "counterId": "CNT-001234-NT",
+      "timestamp": "2024-11-01T00:00:00Z",
+      "value": 5678.90,
+      "unit": "kWh",
+      "source": "ERP",
+      "readingType": "regular",
+      "reason": "monthly_billing"
+    }
+  ],
+  "notes": "Switched from old tariff on 2024-01-01"
+}

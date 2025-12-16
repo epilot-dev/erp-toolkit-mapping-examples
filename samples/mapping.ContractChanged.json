@@ -1,0 +1,259 @@
+{
+  "entities": [
+    {
+      "entity_schema": "contract",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "fields": [
+        {
+          "attribute": "external_id",
+          "field": "contractId"
+        },
+        {
+          "attribute": "contract_number",
+          "field": "contractNumber"
+        },
+        {
+          "attribute": "contract_type",
+          "field": "contractType"
+        },
+        {
+          "attribute": "status",
+          "field": "status"
+        },
+        {
+          "attribute": "contract_start_date",
+          "field": "startDate"
+        },
+        {
+          "attribute": "contract_end_date",
+          "field": "endDate"
+        },
+        {
+          "attribute": "billing_period",
+          "field": "billingCycle"
+        },
+        {
+          "attribute": "payment_method",
+          "field": "paymentMethod"
+        },
+        {
+          "attribute": "tariff_name",
+          "jsonataExpression": "tariff.name"
+        },
+        {
+          "attribute": "price_per_unit",
+          "jsonataExpression": "$string(tariff.pricePerKwh)"
+        },
+        {
+          "attribute": "base_fee",
+          "jsonataExpression": "$string(tariff.baseFee)"
+        },
+        {
+          "attribute": "currency",
+          "jsonataExpression": "tariff.currency"
+        },
+        {
+          "attribute": "delivery_address",
+          "jsonataExpression": "$exists(deliveryAddress) ? {\n  \"street\": deliveryAddress.street,\n  \"postal_code\": $string(deliveryAddress.postalCode),\n  \"city\": deliveryAddress.city,\n  \"country\": deliveryAddress.country\n} : undefined"
+        },
+        {
+          "attribute": "description",
+          "field": "notes"
+        },
+        {
+          "attribute": "customer",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "contact",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "field": "customerId"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "attribute": "meters",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "meter",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "jsonataExpression": "meter.meterId"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "entity_schema": "meter",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "fields": [
+        {
+          "attribute": "external_id",
+          "jsonataExpression": "meter.meterId"
+        },
+        {
+          "attribute": "meter_number",
+          "jsonataExpression": "meter.meterNumber"
+        },
+        {
+          "attribute": "meter_type",
+          "jsonataExpression": "meter.meterType"
+        },
+        {
+          "attribute": "manufacturer",
+          "jsonataExpression": "meter.manufacturer"
+        },
+        {
+          "attribute": "model",
+          "jsonataExpression": "meter.model"
+        },
+        {
+          "attribute": "installation_date",
+          "jsonataExpression": "meter.installationDate"
+        },
+        {
+          "attribute": "location",
+          "jsonataExpression": "meter.location"
+        },
+        {
+          "attribute": "customer",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "contact",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "field": "customerId"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "attribute": "contract",
+          "relations": {
+            "operation": "_set",
+            "items": [
+              {
+                "entity_schema": "contract",
+                "unique_ids": [
+                  {
+                    "attribute": "external_id",
+                    "field": "contractId"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "entity_schema": "meter_counter",
+      "unique_ids": [
+        "external_id"
+      ],
+      "enabled": true,
+      "jsonataExpression": "meter.counters",
+      "fields": [
+        {
+          "attribute": "external_id",
+          "field": "counterId"
+        },
+        {
+          "attribute": "counter_number",
+          "field": "counterNumber"
+        },
+        {
+          "attribute": "counter_type",
+          "field": "counterType"
+        },
+        {
+          "attribute": "tariff_type",
+          "field": "tariffType"
+        },
+        {
+          "attribute": "unit",
+          "field": "unit"
+        },
+        {
+          "attribute": "direction",
+          "field": "direction"
+        }
+      ]
+    }
+  ],
+  "meter_readings": [
+    {
+      "jsonataExpression": "meterReadings",
+      "meter": {
+        "unique_ids": [
+          {
+            "attribute": "external_id",
+            "field": "meterId"
+          }
+        ]
+      },
+      "meter_counter": {
+        "unique_ids": [
+          {
+            "attribute": "external_id",
+            "field": "counterId"
+          }
+        ]
+      },
+      "fields": [
+        {
+          "attribute": "external_id",
+          "field": "readingId"
+        },
+        {
+          "attribute": "timestamp",
+          "field": "timestamp"
+        },
+        {
+          "attribute": "value",
+          "jsonataExpression": "$string(value)"
+        },
+        {
+          "attribute": "unit",
+          "field": "unit"
+        },
+        {
+          "attribute": "source",
+          "field": "source"
+        },
+        {
+          "attribute": "reading_type",
+          "field": "readingType"
+        },
+        {
+          "attribute": "reason",
+          "field": "reason"
+        }
+      ]
+    }
+  ]
+}
